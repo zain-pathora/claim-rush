@@ -21,8 +21,8 @@ export async function mriSuite(ctx) {
   setObjective('Review Maya\'s prescreen with Dev');
   await waitFor({ npc: 'dev' });
   await dialog(dev, [
-    'Hey! Maya filled in her prescreen on her phone last night. Before anyone goes near the magnet, we review it.',
-    'Flag every answer that needs action before the scan.',
+    '[cheerful] Hey! Maya filled in her prescreen on her phone last night. Before anyone goes near the magnet, we review it.',
+    '[serious] Flag every answer that needs action before the scan.',
   ]);
   const claus = await prescreen();
 
@@ -44,7 +44,7 @@ export async function mriSuite(ctx) {
   state.camFocus.set(magnet.x, 1, magnet.z + 1.5);
   magnet.scanning = true;
   sfx.hum();
-  await dialog(mayaSpeaker, [open ? 'Oh, this one is open on the sides. I can do this.' : 'It\'s so tight in here… I\'ll try to hold still.']);
+  await dialog(mayaSpeaker, [open ? '[pleased] Oh, this one is open on the sides. I can do this.' : '[anxious] It\'s so tight in here… I\'ll try to hold still.']);
   await scanGame(open);
   magnet.scanning = false;
   maya.rotation.set(0, 0, 0);
@@ -54,7 +54,7 @@ export async function mriSuite(ctx) {
 
   // e. status + who reads it
   const who = await dialog(dev, [
-    'Scan\'s done: exam status moves to <b>Completed</b>. That\'s also the moment the liens get signed.',
+    '[pleased] Scan\'s done: exam status moves to <b>Completed</b>. That\'s also the moment the liens get signed.',
     'Now the images go to the radiologist. Where does the diagnostic read happen?',
   ], [`${CASE.radiologist.name} reads it in her own radiology system`, 'I read it here in MediFlow', 'MediFlow\'s AI reads it automatically']);
   if (who === 0) toast('✓ Right: MediFlow is never where a study is read', 'good');

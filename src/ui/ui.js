@@ -1,5 +1,5 @@
 import { sfx, onKey } from '../engine/core.js';
-import { speak } from './voice.js';
+import { speak, speakOptions, parseEmotion } from './voice.js';
 
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -71,8 +71,8 @@ export async function dialog(speaker, lines, options) {
   for (let li = 0; li < lines.length; li++) {
     opts.innerHTML = '';
     text.innerHTML = '';
-    const line = lines[li];
-    speak(line, speaker.name);
+    speak(lines[li], speaker.name);
+    const line = parseEmotion(lines[li]).text;
     let skip = false;
     const off = onKey((k) => { if (k === ' ' || k === 'enter' || k === 'e') skip = true; });
     const clickSkip = () => { skip = true; };
@@ -86,7 +86,7 @@ export async function dialog(speaker, lines, options) {
     off(); d.removeEventListener('click', clickSkip);
     const last = li === lines.length - 1;
     if (last && options) {
-      speak(options.map((o, i) => `Option ${i + 1}: ${o}.`).join(' '), 'Narrator', { queue: true });
+      speakOptions(options);
       choice = await new Promise((resolve) => {
         options.forEach((o, i) => {
           const b = el('button', 'opt', `<kbd>${i + 1}</kbd>${o}`);

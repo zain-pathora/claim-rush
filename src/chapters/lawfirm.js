@@ -3,6 +3,7 @@ import { roomX } from '../world/campus.js';
 import { setChapter, setObjective, dialog, chapterCard, openModal, mediflowCard, bumpMeter, meters, toast, wait } from '../ui/ui.js';
 import { CASE } from '../data/case.js';
 import { money } from './billing.js';
+import { speak } from '../ui/voice.js';
 
 const BROWN = '#8d6e63';
 const lena = { name: CASE.attorney.name, role: CASE.attorney.firm, icon: CASE.attorney.icon };
@@ -20,7 +21,7 @@ export async function lawFirm(ctx) {
   cs.owned = cs.billed.tech + (cs.ownsRad ? cs.billed.rad : 0);
   await dialog(lena, [
     cs.ownsRad ? 'I got your assignment notice, so you own both the TECH and RAD liens now. I\'ll negotiate both with you.' : 'Let\'s talk about the TECH bill. I\'ll handle Northside\'s RAD bill with them directly.',
-    `Maya's settlement is tight and four providers want paying. I can't do ${money(cs.owned)}. Let's find a number.`,
+    `[firm] Maya's settlement is tight and four providers want paying. I can't do ${money(cs.owned)}. Let's find a number.`,
   ]);
   cs.agreedPct = await negotiate(cs);
   cs.agreed = Math.round(cs.owned * cs.agreedPct / 100);
@@ -32,16 +33,16 @@ export async function lawFirm(ctx) {
   setChapter(8, 'Settlement');
   setObjective('Collect the settlement payment from Lena');
   await waitFor({ npc: 'lena', label: 'Collect the cheque' });
-  await dialog(lena, [`Maya's case settled. Here's a cheque from our trust account for ${money(cs.agreed)}.`]);
+  await dialog(lena, [`[pleased] Maya's case settled. Here's a cheque from our trust account for ${money(cs.agreed)}.`]);
   if (cs.ownsRad) await allocate(cs);
   else {
-    const c = await dialog(lena, ['Actually, can I just send you one cheque that covers Northside\'s RAD bill too?'],
+    const c = await dialog(lena, ['[question] Actually, can I just send you one cheque that covers Northside\'s RAD bill too?'],
       ['No. While the liens have different owners, each owner gets its own payment', 'Sure, we\'ll pass their share on']);
     if (c === 0) toast('✓ Right: one cheque for two owners is sent back as an exception', 'good');
     else bumpMeter('compliance', -10, 'one cheque for two owners is an exception while ownership is split');
   }
   setObjective('Close the case so the firm can pay out Maya');
-  const rel = await dialog(lena, ['I can\'t release Maya\'s money while your lien is still on the case. What do you send me?'],
+  const rel = await dialog(lena, ['[serious] I can\'t release Maya\'s money while your lien is still on the case. What do you send me?'],
     ['A Release of Lien', 'The approval confirmation from our negotiation', 'Another copy of the bill']);
   if (rel === 0) toast('✓ Release of Lien issued. Claim → PAID', 'good');
   else { bumpMeter('compliance', -12, 'only a Release of Lien lets the firm disburse'); toast('Sent the Release of Lien after all. Claim → PAID', 'info'); }
@@ -56,6 +57,7 @@ async function negotiate(cs) {
   let offer = 45; let ask = 100; let patience = 3; let round = 0;
   const m = openModal({ badge: '🤝 BILL OFFER', title: `Negotiate ${money(cs.owned)}`, color: BROWN, wide: true });
   const render = (status, note = '') => {
+    if (note) speak(note, status === 'SENT' ? 'Narrator' : 'Lena Ortiz', { emotion: { APPROVED: 'pleased', REJECTED: 'annoyed', COUNTERED: 'firm' }[status] || 'calm' });
     m.body.innerHTML = `<div class="neg">
         <div class="track"><div class="fill lena" style="width:${offer}%"><span>Lena ${offer}% · ${money(cs.owned * offer / 100)}</span></div></div>
         <div class="track"><div class="fill you" style="width:${ask}%"><span>You ${ask}% · ${money(cs.owned * ask / 100)}</span></div></div>

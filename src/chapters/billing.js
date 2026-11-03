@@ -19,7 +19,7 @@ export async function billingRoom(ctx) {
   await waitFor({ npc: 'ben' });
   await dialog(ben, [
     `QC passed, so Maya's ${CASE.order.exam} can bill. CPT ${CASE.order.cpt}.`,
-    `Here's the twist: ${CASE.clinic} did the scan, and ${CASE.radiologist.group} did the read. Each business bills its own part.`,
+    `[excited] Here's the twist: ${CASE.clinic} did the scan, and ${CASE.radiologist.group} did the read. Each business bills its own part.`,
   ]);
   await splitBill(cs);
 
@@ -32,14 +32,14 @@ export async function billingRoom(ctx) {
   setObjective('Route the liens to the right signers');
   await dialog(ben, [
     'Each component gets its own lien, signed by the patient (PSL) and by the attorney (ASL).',
-    'Remember: signing a lien doesn\'t lock in any amounts. It names no codes and no dollars.',
+    '[serious] Remember: signing a lien doesn\'t lock in any amounts. It names no codes and no dollars.',
   ]);
   await lienRouting();
   await esignChannels();
 
   setObjective('Decide on Dr. Wong\'s lien offer');
   const buy = await dialog({ name: CASE.radiologist.name, role: CASE.radiologist.group, icon: CASE.radiologist.icon }, [
-    `Settlement could take three years. We'd rather have cash now. We'll sell you our RAD lien (${money(cs.billed.rad)} billed) for ${money(cs.buyPrice)}.`,
+    `[serious] Settlement could take three years. We'd rather have cash now. We'll sell you our RAD lien (${money(cs.billed.rad)} billed) for ${money(cs.buyPrice)}.`,
   ], [`Buy it for ${money(cs.buyPrice)}: we'll own both components`, 'Pass: each business keeps its own lien']);
   if (buy === 0) {
     cs.ownsRad = true;

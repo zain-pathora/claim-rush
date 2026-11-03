@@ -25,11 +25,11 @@ export async function orderIntake(ctx) {
   await waitFor({ npc: 'sam' });
   await dialog(ana, [
     `A 5-page fax just came in from ${CASE.attorney.firm}. MediFlow's AI already split it and guessed which patient each page belongs to.`,
-    'The AI only suggests. A person has to accept it. Tag each page, and catch anything that isn\'t Maya\'s.',
+    '[serious] The AI only suggests. A person has to accept it. Tag each page, and catch anything that isn\'t Maya\'s.',
   ]);
   await faxSort();
   const seat = await dialog(ana, [
-    'Order\'s accepted and the claim is open. One more thing for the claim: where was Maya sitting in the car?',
+    '[pleased] Order\'s accepted and the claim is open. One more thing for the claim: where was Maya sitting in the car?',
   ], ['Driver', 'Front passenger', 'Rear passenger']);
   if (seat === 0) toast('✓ Seat: Driver · Med Pay / PIP: none', 'good');
   else bumpMeter('compliance', -6, 'the police report and the license say she was driving');
@@ -113,8 +113,8 @@ export async function scheduling(ctx) {
   await wait(1200);
   ph.screen.innerHTML = '<div class="call"><div class="avatar">👩🏽</div><b>Maya Reyes</b><small>00:12 · connected</small></div>';
   await dialog({ name: P.name, role: 'Patient', icon: '👩🏽' }, [
-    'Hi, sorry I missed you! I work mornings, so <b>afternoons only</b>, please.',
-    'Oh, and… I get really panicky in <b>tight spaces</b>.',
+    '[cheerful] Hi, sorry I missed you! I work mornings, so <b>afternoons only</b>, please.',
+    '[anxious] Oh, and… I get really panicky in <b>tight spaces</b>.',
   ]);
   ph.hide();
   await leaseCalendar();

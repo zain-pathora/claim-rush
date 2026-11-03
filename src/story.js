@@ -220,12 +220,12 @@ async function intro() {
   });
   await wait(700);
   await dialog({ name: CASE.patient.name, role: 'Driver', icon: '😣' }, [
-    'Ow… my lower back. I didn\'t even see them coming.',
-    'I don\'t have health insurance that covers this. How am I supposed to pay for an MRI?',
+    '[pain] Ow… my lower back. I didn\'t even see them coming.',
+    '[worried] I don\'t have health insurance that covers this. How am I supposed to pay for an MRI?',
   ]);
   await dialog({ name: CASE.attorney.name, role: CASE.attorney.firm, icon: CASE.attorney.icon }, [
-    'Maya, this is Lena Ortiz, your attorney. Don\'t worry about paying up front.',
-    `I've sent a referral to ${CASE.clinic}. They'll treat you on a lien: they get paid from your settlement when the case closes.`,
+    '[reassuring] Maya, this is Lena Ortiz, your attorney. Don\'t worry about paying up front.',
+    `[calm] I've sent a referral to ${CASE.clinic}. They'll treat you on a lien: they get paid from your settlement when the case closes.`,
   ]);
   scene.remove(mayaCar, other);
   state.cutscene = false;

@@ -20,8 +20,8 @@ export async function frontDesk(ctx) {
   walkMaya(new THREE.Vector3(lx + 1.5, 0, 8.6), 2.5);
   await waitFor({ pos: maya.position, label: 'Greet Maya', radius: 2.4 });
   await dialog(mayaSpeaker, [
-    'Hi… Lena said to come here. My back is killing me.',
-    'Do I need to pay anything today?',
+    '[pain] Hi… Lena said to come here. My back is killing me.',
+    '[worried] Do I need to pay anything today?',
   ], ['Nothing today: you\'re treated on a lien, paid from your settlement later.', 'Yes, we need a card on file first.']).then((c) => {
     if (c === 0) bumpMeter('trust', 5, 'clear, honest answer');
     else bumpMeter('trust', -15, 'lien patients pay nothing up front');
@@ -32,7 +32,7 @@ export async function frontDesk(ctx) {
   setObjective('Bring Maya to Rosa at the front desk');
   await waitFor({ npc: 'rosa' });
   const how = await dialog(rosa, [
-    `Welcome! I have Maya's referral from ${CASE.attorney.firm}: ${CASE.order.exam}.`,
+    `[cheerful] Welcome! I have Maya's referral from ${CASE.attorney.firm}: ${CASE.order.exam}.`,
     'Her appointment shows SCHEDULED. First, she needs to log in to the patient portal on the kiosk. How do patients log in?',
   ], ['Phone number + a one-time SMS code', 'Email and a password she picks now', 'Her Social Security number']);
   if (how === 0) toast('✓ Right: patients log in with phone + one-time code', 'good');
@@ -50,7 +50,7 @@ export async function frontDesk(ctx) {
 
   // e. intake packet
   setObjective('Prepare Maya\'s intake packet');
-  await dialog(rosa, ['ID done. Now the intake packet. Which consents does she sign <b>today</b>, at check-in?']);
+  await dialog(rosa, ['[pleased] ID done. Now the intake packet. Which consents does she sign <b>today</b>, at check-in?']);
   await consentPacket();
 
   // f. signature
@@ -59,14 +59,14 @@ export async function frontDesk(ctx) {
 
   // g. visit outcome
   const outcome = await dialog(rosa, [
-    'Packet\'s filed. Last step: update the appointment on the worklist so the practice knows she\'s here.',
+    '[pleased] Packet\'s filed. Last step: update the appointment on the worklist so the practice knows she\'s here.',
   ], ['Arrived', 'Exam completed', 'No Show', 'Couldn\'t complete the exam']);
   if (outcome === 0) { sfx.good(); toast('Appointment → ARRIVED', 'good'); }
   else bumpMeter('compliance', -10, 'she just arrived, the exam hasn\'t happened yet');
   burst(npcs.rosa.mesh.position.clone().setY(2.5), [0x2fcf8f, 0xffffff, 0xffb833], 40, 6);
   await mediflowCard('Front Desk portal → Worklist → Update appointment',
     'Facility staff mark each visit Arrived, Exam completed, No Show or Couldn\'t complete. That outcome flows back to the practice\'s own appointment. Patients log in with phone + one-time code, and the intake packet is filed straight into their documents.');
-  await dialog(rosa, ['All set. Dev will take her through prescreening in the imaging wing. The door\'s open now.']);
+  await dialog(rosa, ['[cheerful] All set. Dev will take her through prescreening in the imaging wing. The door\'s open now.']);
 }
 
 // ---------- mini-games ----------

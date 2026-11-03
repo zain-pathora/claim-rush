@@ -24,14 +24,14 @@ export async function readingRoom(ctx) {
   setObjective('Check in with Dr. Wong');
   await waitFor({ npc: 'iris' });
   const order = await dialog(iris, [
-    'I read Maya\'s study in my own reading system and signed the report. Signing is what pushed the images over to you.',
+    '[calm] I read Maya\'s study in my own reading system and signed the report. Signing is what pushed the images over to you.',
     'Quick check: which arrives in MediFlow first?',
   ], ['The signed report. Images follow after it', 'The images. The report comes later', 'Both at exactly the same time']);
   if (order === 0) toast('✓ Right: the report exists before the images arrive', 'good');
   else bumpMeter('compliance', -6, 'images arrive after the report is signed');
 
   setObjective('Clear the QC queue');
-  await dialog(iris, ['Before anything bills, someone has to look at the images and confirm they\'re the right ones. Here\'s today\'s QC queue.']);
+  await dialog(iris, ['[serious] Before anything bills, someone has to look at the images and confirm they\'re the right ones. Here\'s today\'s QC queue.']);
   await qcQueue();
   burst(ctx.npcs.iris.mesh.position.clone().setY(2.5), [0xa66bff, 0xffffff], 40, 6);
   await mediflowCard('QC Exams queue · Image viewer',
