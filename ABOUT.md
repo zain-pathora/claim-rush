@@ -27,7 +27,8 @@ The lien world is hard to explain. Nobody here is an insurance payer. The patien
   - splitting the settlement cheque and issuing the Release of Lien
 - **"In MediFlow, this is…" cards** after each step, naming the real screen and statuses.
 - **Three meters** (Patient Trust, Compliance, Recovery), and a final settlement statement with a grade.
-- **A 3D campus:** six rooms, staff characters, gates that unlock as you go, cutscene camera, particles and synth sound.
+- **A 3D campus:** six rooms, staff characters, gates that unlock as you go, a sky with drifting clouds, a city skyline, street lamps with bloom, blinking characters with footstep dust, a cutscene camera and particles.
+- **Sound:** generated background music and synth sound effects, all from Web Audio with no audio files. Press M to mute.
 - **Rush mode:** the original arcade game, for quick replays.
 - **Controls:** keyboard, mouse and touch.
 - **Data:** everything is made up. No PHI, no real tenants.
@@ -40,4 +41,4 @@ The lien world is hard to explain. Nobody here is an insurance payer. The patien
 
 ## What's next
 - Case Files: the radiologist-sells case and the shoulder arthrogram.
-- Kenney low-poly models and music.
+- Kenney low-poly models.

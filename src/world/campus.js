@@ -63,7 +63,7 @@ function desk(x, z, color, { monitor = true, rot = 0 } = {}) {
     const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.12, 0.3), std(0x2a3050));
     stand.position.set(-0.6, 1.25, -0.3);
     g.add(mon, scr, stand);
-    animated.push((t) => { scr.material.emissiveIntensity = 0.55 + Math.sin(t * 3 + x) * 0.15; });
+    animated.push((t) => { scr.material.emissiveIntensity = 2.2 + Math.sin(t * 3 + x) * 0.4; });
   }
   const papers = box(0.55, 0.12, 0.42, 0xffffff, 0.03);
   papers.position.set(0.8, 1.22, 0);
@@ -203,12 +203,107 @@ export function buildCampus() {
   add(awning, lx, 3.2, HALF_D + 1.2);
   sign('MEDIFLOW CLINIC', lx, HALF_D + 1.4, 0x2fcf8f, 4);
 
+  buildOutdoors();
   buildOffice(roomX('office'));
   buildLobby(lx);
   buildMri(roomX('mri'));
   buildReading(roomX('reading'));
   buildBilling(roomX('billing'));
   buildLawFirm(roomX('lawfirm'));
+}
+
+function buildOutdoors() {
+  // gradient sky dome
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(140, 32, 16), new THREE.ShaderMaterial({
+    side: THREE.BackSide, fog: false, depthWrite: false,
+    uniforms: { top: { value: new THREE.Color(0x7fa8ff) }, mid: { value: new THREE.Color(0xdfe8ff) }, bottom: { value: new THREE.Color(0xffe7d6) } },
+    vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: 'uniform vec3 top; uniform vec3 mid; uniform vec3 bottom; varying vec3 vP; void main(){ float h = vP.y; vec3 c = h > 0.0 ? mix(mid, top, smoothstep(0.0, 0.6, h)) : mix(mid, bottom, smoothstep(0.0, -0.3, h)); gl_FragColor = vec4(c, 1.0); }',
+  }));
+  sky.position.set(45, 0, 0);
+  scene.add(sky);
+
+  // clouds drifting overhead
+  const cloudMat = std(0xffffff, { roughness: 1, emissive: 0xffffff, emissiveIntensity: 0.15 });
+  for (let i = 0; i < 9; i++) {
+    const c = new THREE.Group();
+    for (let k = 0; k < 4; k++) {
+      const s = new THREE.Mesh(new THREE.SphereGeometry(1.6 + Math.random() * 1.2, 12, 10), cloudMat);
+      s.position.set(k * 1.8 - 2.7, Math.random() * 0.6, Math.random() * 1.2);
+      s.scale.y = 0.6;
+      c.add(s);
+    }
+    c.position.set(-40 + i * 22, 16 + Math.random() * 6, -30 + Math.random() * 20);
+    scene.add(c);
+    const speed = 0.6 + Math.random() * 0.6;
+    animated.push((t, dt) => { c.position.x += speed * dt; if (c.position.x > 150) c.position.x = -60; });
+  }
+
+  // skyline behind the building, windows glow
+  const winMat = std(0xffe9a8, { emissive: 0xffd27a, emissiveIntensity: 1.4 });
+  for (let i = 0; i < 22; i++) {
+    const h = 8 + Math.random() * 14;
+    const w = 5 + Math.random() * 4;
+    const b = new THREE.Mesh(rbox(w, h, 5, 0.3), std([0xb9c5ff, 0xc9b9ff, 0xa9c9f5, 0xd6dcf0][i % 4]));
+    b.position.set(-40 + i * 8.5, h / 2 - 0.3, -26 - Math.random() * 6);
+    scene.add(b);
+    for (let y = 2; y < h - 1; y += 2.2) for (let x = -w / 2 + 1; x < w / 2 - 0.5; x += 1.6) {
+      if (Math.random() < 0.45) continue;
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 1), winMat);
+      win.position.set(b.position.x + x, y, b.position.z + 2.52);
+      scene.add(win);
+    }
+  }
+
+  // trees along the back and the street
+  const trunkMat = std(0x8d6e63);
+  const leafMats = [std(0x5fd690), std(0x46c07a), std(0x7be0a4)];
+  const tree = (x, z, s = 1) => {
+    const g = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 1.6, 8), trunkMat);
+    trunk.position.y = 0.8;
+    g.add(trunk);
+    for (let k = 0; k < 3; k++) {
+      const l = new THREE.Mesh(new THREE.IcosahedronGeometry(1.1 - k * 0.2, 0), leafMats[k % 3]);
+      l.position.y = 2 + k * 0.8;
+      l.rotation.y = k;
+      g.add(l);
+    }
+    g.scale.setScalar(s);
+    const sway = Math.random() * 6;
+    animated.push((t) => { g.rotation.z = Math.sin(t * 0.9 + sway) * 0.025; });
+    add(g, x, -0.3, z);
+  };
+  for (let x = -14; x < 110; x += 7 + Math.random() * 3) tree(x, -11 - Math.random() * 3, 1 + Math.random() * 0.5);
+  for (let x = -16; x < 112; x += 12) if (Math.abs(x - roomX('lobby')) > 5) tree(x, 21, 1.2);
+
+  // street lamps on the sidewalk, bulbs bloom
+  const bulbMat = std(0xfff3c4, { emissive: 0xffe28a, emissiveIntensity: 4 });
+  for (let x = -12; x < 112; x += 14) {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 3.6, 8), std(0x3a4066));
+    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 10), bulbMat);
+    bulb.position.y = 1.9;
+    pole.add(bulb);
+    add(pole, x, 1.5, 12.4);
+  }
+
+  // parked cars across the street
+  const carColors = [0x7fd3ff, 0xffc46b, 0xb39ddb, 0x8ee6b8, 0xff8fa3];
+  for (let i = 0; i < 7; i++) {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(rbox(3.2, 0.85, 1.6, 0.3), std(carColors[i % carColors.length]));
+    body.position.y = 0.55;
+    const cab = new THREE.Mesh(rbox(1.8, 0.65, 1.4, 0.25), std(0xdff3ff, { roughness: 0.1 }));
+    cab.position.set(-0.2, 1.2, 0);
+    g.add(body, cab);
+    for (const [wx, wz] of [[-1, 0.8], [1, 0.8], [-1, -0.8], [1, -0.8]]) {
+      const wh = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.25, 14), std(0x222533));
+      wh.rotation.x = Math.PI / 2;
+      wh.position.set(wx, 0.32, wz);
+      g.add(wh);
+    }
+    add(g, 4 + i * 15 + Math.random() * 4, -0.3, 18.6);
+  }
 }
 
 function buildOffice(cx) {
@@ -276,7 +371,7 @@ function buildMri(cx) {
   g.add(shell, ring, bore, bed, bedBase);
   add(g, cx + 4, 0, -3.5, { collide: true });
   Object.assign(magnet, { group: g, ring, bed, x: cx + 4, z: -3.5 });
-  animated.push((t) => { ring.material.emissiveIntensity = 0.5 + Math.sin(t * 4) * 0.3 * (magnet.scanning ? 2 : 0.3); });
+  animated.push((t) => { ring.material.emissiveIntensity = 2 + Math.sin(t * 4) * (magnet.scanning ? 1.5 : 0.4); });
   // warning floor stripe
   const zone = new THREE.Mesh(new THREE.RingGeometry(3.4, 3.7, 48), new THREE.MeshBasicMaterial({ color: 0xff4d6d, transparent: true, opacity: 0.5 }));
   zone.rotation.x = -Math.PI / 2;

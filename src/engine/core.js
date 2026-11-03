@@ -1,5 +1,9 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
 export { THREE };
 export const std = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, ...extra });
@@ -20,10 +24,18 @@ scene.background = new THREE.Color(0xdfe8ff);
 scene.fog = new THREE.Fog(0xdfe8ff, 34, 70);
 
 export const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 200);
+// bloom only picks up bright, emissive things: screens, signs, the magnet ring
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.5, 0.5, 1.6);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
 });
 
 scene.add(new THREE.HemisphereLight(0xffffff, 0x9aa4d6, 1.4));
@@ -44,7 +56,7 @@ export function tick() {
   const t = clock.elapsedTime;
   for (const fn of updaters) fn(dt, t);
   updateFx(dt);
-  renderer.render(scene, camera);
+  composer.render(dt);
 }
 function loop() { tick(); requestAnimationFrame(loop); }
 export const startLoop = () => requestAnimationFrame(loop);
@@ -173,10 +185,12 @@ export function person({ color = 0x4f6bff, skin = 0xffe0bd, hair = null, coat = 
     rig.add(h);
   }
   const eyeMat = std(0x1b2240, { roughness: 0.2 });
+  const eyes = [];
   for (const x of [-0.14, 0.14]) {
     const eye = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 8), eyeMat);
     eye.position.set(x, 1.9, 0.38);
     rig.add(eye);
+    eyes.push(eye);
   }
   const blushMat = std(0xff9aa8);
   for (const x of [-0.25, 0.25]) {
@@ -208,7 +222,7 @@ export function person({ color = 0x4f6bff, skin = 0xffe0bd, hair = null, coat = 
   shadow.rotation.x = -Math.PI / 2;
   shadow.position.y = 0.02;
   g.add(shadow);
-  g.userData = { rig, arms, feet, walk: Math.random() * 6, squash: 0, wave: 0 };
+  g.userData = { rig, arms, feet, eyes, walk: Math.random() * 6, squash: 0, wave: 0, blink: 1 + Math.random() * 3, dust: 0 };
   return g;
 }
 
@@ -226,6 +240,16 @@ export function animatePerson(m, speed, dt) {
     u.wave = Math.max(0, u.wave - dt);
     u.arms[1].rotation.z = -2.6 + Math.sin(u.wave * 20) * 0.4;
   } else u.arms[1].rotation.z = 0;
+  // blink every few seconds
+  u.blink -= dt;
+  const shut = u.blink < 0.12;
+  for (const e of u.eyes) e.scale.y = shut ? 0.15 : 1;
+  if (u.blink < 0) u.blink = 2 + Math.random() * 3;
+  // footstep dust
+  if (speed > 3) {
+    u.dust -= dt;
+    if (u.dust <= 0) { u.dust = 0.18; puff(m.getWorldPosition(new THREE.Vector3())); }
+  }
   u.squash = Math.max(0, u.squash - dt * 4);
   const s = 1 + Math.sin(u.walk * 0.5) * 0.02 * (1 - amp) - u.squash * 0.25;
   u.rig.scale.set(1 + u.squash * 0.2, s, 1 + u.squash * 0.2);
@@ -253,7 +277,24 @@ export function floatText(text, pos, color) {
   scene.add(s);
   floaters.push(s);
 }
+const puffGeo = new THREE.SphereGeometry(0.16, 8, 6);
+const puffs = [];
+export function puff(pos) {
+  const m = new THREE.Mesh(puffGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55 }));
+  m.position.set(pos.x + (Math.random() - 0.5) * 0.3, 0.12, pos.z + (Math.random() - 0.5) * 0.3);
+  m.userData.life = 0.6;
+  scene.add(m);
+  puffs.push(m);
+}
 function updateFx(dt) {
+  for (let i = puffs.length - 1; i >= 0; i--) {
+    const p = puffs[i];
+    p.userData.life -= dt;
+    p.scale.setScalar(1 + (0.6 - p.userData.life) * 2.5);
+    p.position.y += dt * 0.4;
+    p.material.opacity = Math.max(0, p.userData.life) * 0.9;
+    if (p.userData.life <= 0) { scene.remove(p); p.material.dispose(); puffs.splice(i, 1); }
+  }
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i]; const u = p.userData;
     u.v.y -= 14 * dt;

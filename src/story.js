@@ -3,6 +3,7 @@ import { buildCampus, updateCampus, resolveCollisions, interactables, npcs, addN
 import { showHud, setChapter, setObjective, setHint, dialog, chapterCard, resetMeters, meters, uiState, toast, wait } from './ui/ui.js';
 import { CASE } from './data/case.js';
 import { orderIntake, scheduling } from './chapters/office.js';
+import { startMusic, toggleMute, isMuted } from './engine/music.js';
 import { frontDesk } from './chapters/frontDesk.js';
 import { mriSuite } from './chapters/mri.js';
 import { readingRoom } from './chapters/reading.js';
@@ -225,6 +226,7 @@ async function intro() {
 async function story() {
   document.getElementById('screen').classList.add('hidden');
   if (audio.state === 'suspended') audio.resume();
+  startMusic();
   resetMeters();
   await intro();
   state.playing = true;
@@ -287,5 +289,10 @@ function finale(cs) {
 }
 
 document.getElementById('play-story').onclick = story;
+const muteBtn = document.getElementById('mute');
+const paintMute = () => { muteBtn.textContent = isMuted() ? '🔇' : '🎵'; };
+muteBtn.onclick = () => { toggleMute(); paintMute(); muteBtn.blur(); };
+onKey((k) => { if (k === 'm') { toggleMute(); paintMute(); } });
+paintMute();
 startLoop();
 if (import.meta.env.DEV) window.__story = { state, player, maya, npcs, tick, tryUse, target: () => target };
