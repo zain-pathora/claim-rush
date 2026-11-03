@@ -2,7 +2,7 @@
 
 > One accident, one patient, one lien, followed all the way to the release, through the real MediFlow 360 workflow.
 
-Status: **approved 2026-11-03.** Steps 1–2 (engine, campus, Front Desk, MRI) are built.
+Status: **approved 2026-11-03.** Story chapters 0 and 3–8 are built and playable end to end. Chapters 1–2 (Order Intake, Scheduling), Case Files and Kenney models are still to do.
 
 ## 1. What changes from v1, and why
 

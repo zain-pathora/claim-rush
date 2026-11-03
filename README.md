@@ -21,9 +21,12 @@ You are the clinic's care coordinator. Walk the campus, talk to staff, and clear
 | 0 · The Accident | Street | Cutscene: the crash and the attorney's referral | Firm referral |
 | 1 · Front Desk | Lobby | Log in with a one-time SMS code, catch a wrong DOB on the referral, build the intake packet, e-sign, mark the visit **Arrived** | Front Desk portal, patient portal OTP, intake consents (HIPAA_AUTH, TREATMENT_CONSENT, RECORDS_RELEASE) |
 | 2 · Prescreen & MRI | Imaging wing | Flag prescreen red flags, pick the open magnet for a claustrophobic patient, clear metal before it flies into the magnet, time 3 scan sequences, assign the radiologist | Prescreen, exam status chain (Completed → Read Assigned), TECH vs RAD components |
-| 3 → 6 | Reading Room, Billing, Law Firm | *Coming next*: QC, split bills and liens, negotiation, settlement and Release of Lien | See [PLAN.md](PLAN.md) |
+| 3 · Reading Room & QC | Reading Room | Know that the signed report arrives before the images, then pass or hold three studies in the QC queue (wrong body part, wrong DOB) | QC Exams queue, image viewer (verify only, never read) |
+| 4 · Billing & Liens | Billing | Split CPT 72148 into TECH and RAD bills, send the TECH bill first (DRAFT → SENT), route PSL/ASL liens to patient and attorney, reach the attorney by email/fax, and decide whether to buy the radiologist's lien | CPT pricing per component, bills, liens, lien sale + assignment notice |
+| 5 · The Negotiation | Law Firm | A two-way bill-offer duel with the attorney: hold, counter, meet halfway or approve before her patience runs out | Bill offers: SENT → COUNTERED → APPROVED |
+| 6 · Settlement | Law Firm | Split the cheque across TECH and RAD in proportion, refuse a single cheque for two owners, issue the **Release of Lien** | Receive payments, allocation, Release of Lien |
 
-Three meters track how you do: **Patient Trust**, **Compliance** and **Recovery**. After each step, an "In MediFlow, this is…" card names the real screen.
+Three meters track how you do: **Patient Trust**, **Compliance** and **Recovery**. After each step, an "In MediFlow, this is…" card names the real screen. The game ends on a settlement statement (billed, reduction, collected, lien released) with a grade from S to D.
 
 ### Rush mode (arcade)
 

@@ -212,3 +212,24 @@ button.big:active { transform: translateY(6px); box-shadow: 0 2px 0 #3446c4; }
   #phone { right: 50%; transform: translate(50%, -50%) scale(.85); }
   #mfcard { right: 12px; left: 12px; width: auto; }
 }
+
+/* ledger / segmented picks */
+.ledger { display: grid; gap: 10px; }
+.lrow { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: #f8f9ff; border-radius: 16px; padding: 12px 14px; }
+.lrow b { display: block; color: var(--ink); }
+.lrow small { color: var(--muted); }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.seg span { padding: 8px 12px; border-radius: 12px; background: #fff; border: 2px solid #e1e6ff; font-weight: 600; font-size: 13px; cursor: pointer; transition: .15s; }
+.seg span:hover { border-color: var(--st); }
+.seg span.on { background: var(--st); border-color: var(--st); color: #fff; transform: translateY(-2px); }
+
+/* negotiation */
+.neg { display: grid; gap: 12px; }
+.track { height: 44px; background: #f4f6ff; border-radius: 14px; overflow: hidden; }
+.track .fill { height: 100%; border-radius: 14px; display: flex; align-items: center; padding: 0 14px; color: #fff; font-weight: 700; white-space: nowrap; transition: width .7s cubic-bezier(.2,1.3,.4,1); }
+.fill.lena { background: linear-gradient(90deg, #8d6e63, #bc8f7a); }
+.fill.you { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.negmeta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; color: var(--muted); font-weight: 600; }
+.pill2 { background: var(--ink); color: #fff; border-radius: 999px; padding: 4px 12px; font-size: 13px; letter-spacing: .06em; }
+.negnote { margin: 0; font-size: 17px; color: var(--ink); animation: optIn .4s; }
+.alloc { width: 100%; accent-color: var(--st); height: 30px; }

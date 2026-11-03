@@ -4,6 +4,9 @@ import { showHud, setChapter, setObjective, setHint, dialog, chapterCard, resetM
 import { CASE } from './data/case.js';
 import { frontDesk } from './chapters/frontDesk.js';
 import { mriSuite } from './chapters/mri.js';
+import { readingRoom } from './chapters/reading.js';
+import { billingRoom, money } from './chapters/billing.js';
+import { lawFirm } from './chapters/lawfirm.js';
 
 buildCampus();
 
@@ -227,31 +230,51 @@ async function story() {
   state.camMode = 'follow';
   showHud(true);
 
-  const ctx = { player, maya, follow, npcs, waitFor, walkMaya, state, magnet, openGate };
+  // amounts in cents, all made up
+  const caseState = { billed: { tech: 180000, rad: 45000 }, buyPrice: 30000, ownsRad: false };
+  const ctx = { player, maya, follow, npcs, waitFor, walkMaya, state, magnet, openGate, caseState };
+  const unlock = (i, text) => { openGate(i); sfx.door(); toast(`🔓 ${text} unlocked`, 'good'); };
   await frontDesk(ctx);
-  openGate(1);
-  sfx.door();
-  toast('🔓 Imaging wing unlocked', 'good');
+  unlock(1, 'Imaging wing');
   await mriSuite(ctx);
-  finale();
+  // Maya heads home; the rest of the case happens without her
+  follow.on = false;
+  walkMaya(new THREE.Vector3(roomX('lobby'), 0, 12), 3);
+  toast('👋 Maya heads home. The case keeps moving without her.', 'info');
+  unlock(2, 'Reading Room');
+  await readingRoom(ctx);
+  unlock(3, 'Billing');
+  await billingRoom(ctx);
+  unlock(4, 'Law Firm');
+  await lawFirm(ctx);
+  finale(caseState);
 }
 
 function grade() {
-  const s = (meters.trust + meters.compliance) / 2;
-  return s >= 92 ? 'S' : s >= 80 ? 'A' : s >= 65 ? 'B' : s >= 50 ? 'C' : 'D';
+  const s = meters.trust * 0.3 + meters.compliance * 0.4 + meters.recovery * 0.3;
+  return s >= 88 ? 'S' : s >= 78 ? 'A' : s >= 65 ? 'B' : s >= 50 ? 'C' : 'D';
 }
 
-function finale() {
+function finale(cs) {
   state.playing = false;
   showHud(false);
+  const reduction = cs.owned - cs.agreed;
+  const radNet = cs.ownsRad ? Math.round(cs.agreed * cs.billed.rad / (cs.billed.tech + cs.billed.rad)) - cs.buyPrice : 0;
   const scr = document.getElementById('screen');
-  scr.innerHTML = `<div class="card"><div class="kicker">End of this build</div><h1>${grade()}</h1>
-    <p class="tag">Maya's MRI is done and the exam is now <b>Read Assigned</b> to the radiologist.</p>
+  scr.innerHTML = `<div class="card"><div class="kicker">Settlement statement · Claim PAID</div><div class="grade">${grade()}</div>
+    <p class="tag">Maya got her MRI without paying a cent up front. The firm closed her case, and your lien is released.</p>
+    <div class="recap">
+      <div><span>Billed (${cs.ownsRad ? 'TECH + RAD' : 'TECH'})</span><b>${money(cs.owned)}</b></div>
+      <div><span>Reduction (adjustment)</span><b>−${money(reduction)}</b></div>
+      <div><span>Collected from the firm</span><b>${money(cs.agreed)}</b></div>
+      ${cs.ownsRad ? `<div><span>RAD lien: bought for ${money(cs.buyPrice)}, net</span><b>${radNet >= 0 ? '+' : '−'}${money(Math.abs(radNet))}</b></div>` : ''}
+      <div><span>Lien status</span><b>Released ✓</b></div>
+    </div>
     <div class="recap">
       <div><span>💙 Patient Trust</span><b>${meters.trust}</b></div>
       <div><span>🛡️ Compliance</span><b>${meters.compliance}</b></div>
+      <div><span>💰 Recovery</span><b>${meters.recovery}%</b></div>
     </div>
-    <p class="small">Coming next: Reading Room &amp; QC → Billing &amp; Liens → the Law Firm negotiation → Settlement &amp; Release of Lien.</p>
     <div class="modes"><button class="big" onclick="location.reload()">Play again</button><a class="mode-alt" href="./rush.html">⚡ Rush mode</a></div></div>`;
   scr.classList.remove('hidden');
   burst(player.position.clone().setY(2), [0xff5ca8, 0xffb833, 0x4f6bff, 0x1fc98a, 0x9b5cff], 90, 9);
