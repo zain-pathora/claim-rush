@@ -65,13 +65,13 @@ export function waitFor(spot) {
   return new Promise((resolve) => {
     const pos = spot.npc ? npcs[spot.npc].mesh.position : spot.pos;
     const label = spot.label || `Talk to ${npcs[spot.npc].name}`;
-    target = { pos, label, radius: spot.radius || 2.6, resolve, npc: spot.npc };
+    target = { pos, label, radius: spot.radius || (spot.npc ? 3.8 : 2.8), resolve, npc: spot.npc };
     if (spot.npc) npcs[spot.npc].marker.visible = true;
   });
 }
 function tryUse() {
   if (!target || uiState.busy || state.cutscene) return;
-  if (target.pos.distanceTo(player.position) > target.radius) return;
+  if (target.pos.distanceTo(player.position) > target.radius) { toast(`Get closer: follow the gold arrow to ${target.label.toLowerCase()}`, 'info'); return; }
   const t = target;
   target = null;
   if (t.npc) { npcs[t.npc].marker.visible = false; npcs[t.npc].mesh.userData.wave = 0.8; facePlayer(npcs[t.npc].mesh); }
