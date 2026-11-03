@@ -6,40 +6,47 @@
   <title>Claim Rush</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./src/style.css" />
+  <link rel="stylesheet" href="./src/story.css" />
 </head>
 <body>
   <div id="app"></div>
   <div id="flash"></div>
-  <div id="hud" class="hidden">
-    <div class="pill" id="score"><span class="ic">★</span><span class="v">0</span></div>
-    <div class="pill" id="level"><span class="ic">▲</span><span class="v">1</span><span class="quota"><i></i></span><span class="k q">0/3</span></div>
-    <div class="pill" id="timer"><span class="ic">⏱</span><span class="v">60</span></div>
-    <div class="pill" id="denials"><span class="ic">✚</span><span class="hearts">❤❤❤</span></div>
+
+  <div id="story-hud" class="hidden">
+    <div id="chapter-label"></div>
+    <div id="objective"></div>
+    <div id="meters"></div>
   </div>
-  <div id="carry" class="hidden"></div>
   <div id="hint" class="hidden"></div>
-  <div id="toast"></div>
-  <div id="prompt-wrap" class="hidden">
-    <div id="prompt">
-      <span class="badge" id="prompt-badge"></span>
-      <h2 id="prompt-title"></h2>
-      <div id="prompt-body"></div>
-      <div id="prompt-options"></div>
+  <div id="toasts"></div>
+
+  <div id="dialog" class="hidden">
+    <div class="portrait"></div>
+    <div class="dbody">
+      <div class="who"></div>
+      <div class="say"></div>
+      <div class="opts"></div>
     </div>
   </div>
+
+  <div id="modal-wrap" class="hidden"><div id="modal"></div></div>
+  <div id="mfcard" class="hidden"></div>
+  <div id="phone" class="hidden"><div class="notch"></div><div class="pscreen"></div></div>
+  <div id="chapter-card" class="hidden"></div>
+
   <div id="screen">
     <div class="card">
+      <div class="kicker">Code Clash 48</div>
       <h1>Claim Rush</h1>
-      <p class="tag">Get every patient from intake to lien before the clock runs out.</p>
-      <div class="flow">
-        <div><b>📋</b>Intake</div><div><b>🩺</b>Exam</div><div><b>💳</b>Claim</div><div><b>⚖️</b>Lien</div>
+      <p class="tag">One accident. One patient. One lien.<br />Follow a real personal-injury case through MediFlow 360, from the front door to the release.</p>
+      <div class="modes">
+        <button id="play-story" class="big">▶ Story mode</button>
+        <a class="mode-alt" href="./rush.html">⚡ Rush mode <small>arcade</small></a>
       </div>
-      <p class="keys"><kbd>WASD</kbd> move · <kbd>E</kbd> pick up / drop off · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> answer</p>
-      <button id="start" class="big">Start shift</button>
-      <p class="small">All patients are made up. No PHI.</p>
+      <p class="keys"><kbd>WASD</kbd> move · <kbd>E</kbd> talk / use · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> choose · touch: drag to walk</p>
+      <p class="small">Every person, clinic and law firm in this game is made up. No PHI.</p>
     </div>
   </div>
-  <script type="module" src="./src/main.js"></script>
+  <script type="module" src="./src/story.js"></script>
 </body>
 </html>
