@@ -332,15 +332,15 @@ function buildProps() {
   }
   // lobby lounge
   if (deco('loungeSofa', lx - 5.2, 5.2, { size: 3, rot: Math.PI, collide: true })) {
-    deco('loungeSofa', lx - 7.3, 2.4, { size: 3, rot: Math.PI / 2, collide: true });
+    deco('loungeSofa', lx - 7.3, 4.3, { size: 3, rot: Math.PI / 2, collide: true });
     deco('tableCoffee', lx - 5, 2.6, { size: 1.6 });
-    deco('lampSquareFloor', lx - 7.3, 5.6, { height: 2.2, collide: false });
+    deco('lampSquareFloor', lx - 7.4, 6.5, { height: 2.2, collide: false });
   }
   deco('trashcan', lx + 6.6, -0.6, { height: 0.8 });
   // back office
   const ox = roomX('office');
-  deco('sideTable', ox + 6.8, 2.5, { height: 1 });
-  deco('kitchenCoffeeMachine', ox + 6.8, 2.5, { height: 0.7, y: 1, collide: false });
+  deco('sideTable', ox + 6.8, 4.2, { height: 1 });
+  deco('kitchenCoffeeMachine', ox + 6.8, 4.2, { height: 0.7, y: 1, collide: false });
   deco('trashcan', ox - 1.5, -4.6, { height: 0.8 });
   // billing + law firm
   deco('coatRackStanding', roomX('billing') + 7, -6, { height: 2.2 });

@@ -42,6 +42,9 @@ The original arcade loop: carry patients through intake → exam → claim → l
 | `E` / `Space` | Talk / use |
 | `1` `2` `3` | Choose a dialog option |
 | `Enter` | Continue |
+| `V` | Voice-over on/off (reads dialog, answer choices, tasks and cards aloud) |
+| `R` | Repeat the last voice-over |
+| `M` | Music on/off |
 | Touch | Drag to walk, tap to use |
 
 ---

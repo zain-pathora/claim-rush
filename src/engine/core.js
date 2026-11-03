@@ -70,7 +70,7 @@ addEventListener('keydown', (e) => {
   const k = e.key.toLowerCase();
   if (e.target instanceof HTMLInputElement) return;
   keys.add(k);
-  if (audio.state === 'suspended') audio.resume();
+  unlockAudio();
   for (const fn of keyHandlers) fn(k, e);
 });
 addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
@@ -103,6 +103,20 @@ export function moveVector() {
 
 // ---------- audio (Web Audio synth, no files) ----------
 export const audio = new (window.AudioContext || window.webkitAudioContext)();
+// Browsers keep audio locked until a user gesture. Resume on every gesture (Safari can also
+// drop to 'interrupted'), and play one silent buffer, which older Safari needs to unlock.
+let unlocked = false;
+export function unlockAudio() {
+  if (audio.state !== 'running') audio.resume().catch(() => {});
+  if (unlocked) return;
+  unlocked = true;
+  const src = audio.createBufferSource();
+  src.buffer = audio.createBuffer(1, 1, 22050);
+  src.connect(audio.destination);
+  src.start(0);
+}
+for (const ev of ['pointerdown', 'touchend', 'click', 'keydown']) addEventListener(ev, unlockAudio, { capture: true, passive: true });
+window.claimRushAudioState = () => audio.state;
 export function beep(freq, dur = 0.12, type = 'sine', vol = 0.12, slide = 0) {
   const o = audio.createOscillator(); const g = audio.createGain();
   o.type = type; o.frequency.value = freq;

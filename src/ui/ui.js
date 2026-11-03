@@ -1,4 +1,5 @@
 import { sfx, onKey } from '../engine/core.js';
+import { speak } from './voice.js';
 
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -71,6 +72,7 @@ export async function dialog(speaker, lines, options) {
     opts.innerHTML = '';
     text.innerHTML = '';
     const line = lines[li];
+    speak(line, speaker.name);
     let skip = false;
     const off = onKey((k) => { if (k === ' ' || k === 'enter' || k === 'e') skip = true; });
     const clickSkip = () => { skip = true; };
@@ -84,6 +86,7 @@ export async function dialog(speaker, lines, options) {
     off(); d.removeEventListener('click', clickSkip);
     const last = li === lines.length - 1;
     if (last && options) {
+      speak(options.map((o, i) => `Option ${i + 1}: ${o}.`).join(' '), 'Narrator', { queue: true });
       choice = await new Promise((resolve) => {
         options.forEach((o, i) => {
           const b = el('button', 'opt', `<kbd>${i + 1}</kbd>${o}`);
@@ -117,6 +120,8 @@ export function openModal({ badge, title, color = '#4f6bff', wide = false }) {
   m.innerHTML = `<div class="mhead"><span class="badge">${badge}</span><h2>${title}</h2></div><div class="mbody"></div>`;
   wrap.classList.remove('hidden');
   sfx.open();
+  // read the task title, then its first instruction once the chapter has filled the body
+  setTimeout(() => speak(`${title}. ${m.querySelector('.mbody p')?.innerHTML || ''}`), 60);
   return {
     body: m.querySelector('.mbody'),
     close() { wrap.classList.add('hidden'); uiState.busy = false; },
@@ -131,6 +136,7 @@ export function mediflowCard(screen, text) {
     c.innerHTML = `<div class="mf-logo">MediFlow 360</div><div class="mf-k">In MediFlow, this is</div><h3>${screen}</h3><p>${text}</p><button class="go">Got it <kbd>Enter</kbd></button>`;
     c.classList.remove('hidden');
     sfx.good();
+    speak(`In MediFlow, this is ${screen}. ${text}`);
     const done = () => { off(); c.classList.add('hidden'); uiState.busy = false; resolve(); };
     c.querySelector('.go').onclick = done;
     const off = onKey((k) => { if (k === 'enter' || k === ' ') done(); });
@@ -150,6 +156,7 @@ export function phone(html) {
 export async function chapterCard(num, title, sub) {
   const c = $('chapter-card');
   c.innerHTML = `<div class="cn">Chapter ${num}</div><h1>${title}</h1><p>${sub}</p>`;
+  speak(`Chapter ${num}. ${title}. ${sub}`);
   c.classList.remove('hidden', 'out');
   sfx.chapter();
   await wait(2600);

@@ -29,6 +29,7 @@ The lien world is hard to explain. Nobody here is an insurance payer. The patien
 - **Three meters** (Patient Trust, Compliance, Recovery), and a final settlement statement with a grade.
 - **A 3D campus:** six rooms, staff characters, gates that unlock as you go, a sky with drifting clouds, a city skyline, street lamps with bloom, blinking characters with footstep dust, a cutscene camera and particles.
 - **Sound:** generated background music and synth sound effects, all from Web Audio with no audio files. Press M to mute.
+- **Voice-over:** every dialog line, answer choice, task instruction and MediFlow card is read aloud with the browser's built-in speech, a different voice per character. V toggles it, R repeats.
 - **Rush mode:** the original arcade game, for quick replays.
 - **Controls:** keyboard, mouse and touch.
 - **Data:** everything is made up. No PHI, no real tenants.

@@ -1,9 +1,10 @@
-import { THREE, scene, camera, sun, onFrame, startLoop, tick, onKey, moveVector, person, animatePerson, burst, fx, sfx, std, rbox, textSprite, audio } from './engine/core.js';
+import { THREE, scene, camera, sun, onFrame, startLoop, tick, onKey, moveVector, person, animatePerson, burst, fx, sfx, std, rbox, textSprite, audio, unlockAudio } from './engine/core.js';
 import { buildCampus, updateCampus, resolveCollisions, interactables, npcs, addNpc, openGate, roomX, magnet } from './world/campus.js';
 import { showHud, setChapter, setObjective, setHint, dialog, chapterCard, resetMeters, meters, uiState, toast, wait } from './ui/ui.js';
 import { CASE } from './data/case.js';
 import { orderIntake, scheduling } from './chapters/office.js';
 import { preloadModels } from './engine/models.js';
+import { toggleVoice, voiceOn, repeatSpeech } from './ui/voice.js';
 import { startMusic, toggleMute, isMuted } from './engine/music.js';
 import { frontDesk } from './chapters/frontDesk.js';
 import { mriSuite } from './chapters/mri.js';
@@ -233,7 +234,7 @@ async function intro() {
 // ---------- story flow ----------
 async function story() {
   document.getElementById('screen').classList.add('hidden');
-  if (audio.state === 'suspended') audio.resume();
+  unlockAudio();
   startMusic();
   resetMeters();
   await intro();
@@ -299,7 +300,15 @@ function finale(cs) {
 document.getElementById('play-story').onclick = story;
 const muteBtn = document.getElementById('mute');
 const paintMute = () => { muteBtn.textContent = isMuted() ? '🔇' : '🎵'; };
-muteBtn.onclick = () => { toggleMute(); paintMute(); muteBtn.blur(); };
+muteBtn.onclick = () => { toggleMute(); paintMute();
+const voiceBtn = document.getElementById('voice');
+const paintVoice = () => { voiceBtn.textContent = voiceOn() ? '🗣️' : '🤐'; voiceBtn.title = voiceOn() ? 'Voice-over on (V) · R to repeat' : 'Voice-over off (V)'; };
+voiceBtn.onclick = () => { toggleVoice(); paintVoice(); voiceBtn.blur(); toast(voiceOn() ? '🗣️ Voice-over on · press R to repeat' : 'Voice-over off', 'info'); };
+onKey((k) => {
+  if (k === 'v') { toggleVoice(); paintVoice(); toast(voiceOn() ? '🗣️ Voice-over on · press R to repeat' : 'Voice-over off', 'info'); }
+  if (k === 'r') repeatSpeech();
+});
+paintVoice(); muteBtn.blur(); };
 onKey((k) => { if (k === 'm') { toggleMute(); paintMute(); } });
 paintMute();
 startLoop();
