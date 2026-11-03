@@ -37,7 +37,6 @@ The lien world is hard to explain. Nobody here is an insurance payer. The patien
 - Vite + Three.js in plain JavaScript, with Kenney CC0 models (animated characters, furniture, cars, trees), with Web Audio for sound and Google Fonts (Fredoka). No backend, no paid services.
 - Chapters are async functions that wait for the player to reach an NPC or spot, then run dialogs and DOM mini-games.
 - Deployed to GitHub Pages by a GitHub Actions workflow.
-- Built with Claude Code.
 
 ## What's next
 - Case Files: the radiologist-sells case and the shoulder arthrogram.
