@@ -1,4 +1,5 @@
 import { THREE, scene, std, rbox, textSprite, emojiSprite, person } from '../engine/core.js';
+import { model } from '../engine/models.js';
 
 export const ROOM_SPACING = 18;
 const HALF_W = 8; // inner half width (x)
@@ -32,7 +33,17 @@ function add(mesh, x, y, z, { shadow = true, collide = false } = {}) {
 }
 const box = (w, h, d, color, r = 0.1, extra) => new THREE.Mesh(rbox(w, h, d, r), std(color, extra));
 
+// place a Kenney model; returns null if models didn't load
+function deco(name, x, z, { height, size, rot = 0, collide = true, y = 0 } = {}) {
+  const m = model(name, { height, size });
+  if (!m) return null;
+  m.rotation.y = rot;
+  return add(m, x, y, z, { collide });
+}
+
 function plant(x, z, s = 1) {
+  const k = deco(Math.random() < 0.5 ? 'pottedPlant' : 'plantSmall2', x, z, { height: 1.7 * s });
+  if (k) return k;
   const g = new THREE.Group();
   const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.3, 0.6, 16), std(0xff9f7a));
   pot.position.y = 0.3;
@@ -69,7 +80,9 @@ function desk(x, z, color, { monitor = true, rot = 0 } = {}) {
   papers.position.set(0.8, 1.22, 0);
   g.add(papers);
   g.rotation.y = rot;
-  return add(g, x, 0, z, { collide: true });
+  const placed = add(g, x, 0, z, { collide: true });
+  deco('chairDesk', x + 0.9, z - 1.3, { height: 1.3, rot: Math.PI, collide: false });
+  return placed;
 }
 
 function chairRow(x, z, n, color = 0x6f86ff, rot = 0) {
@@ -92,8 +105,8 @@ function sign(text, x, z, color, y = 3.2) {
   return s;
 }
 
-export function addNpc(id, { name, role, x, z, color, skin, hair, coat, face = 0, icon }) {
-  const m = person({ color, skin, hair, coat });
+export function addNpc(id, { name, role, x, z, color, skin, hair, coat, face = 0, icon, model: modelName }) {
+  const m = person({ color, skin, hair, coat, model: modelName });
   m.rotation.y = face;
   add(m, x, 0, z);
   const tag = textSprite(name, '#1b2240', '#ffffff', 0.5);
@@ -199,11 +212,10 @@ export function buildCampus() {
   // lobby entrance (front wall with a gap)
   const lx = roomX('lobby');
   for (const sx of [-1, 1]) add(new THREE.Mesh(rbox(6.5, 0.7, 0.4, 0.15), std(0x2fcf8f)), lx + sx * 5.75, 0.35, HALF_D + 0.2);
-  const awning = box(5, 0.25, 2, 0x2fcf8f, 0.1);
-  add(awning, lx, 3.2, HALF_D + 1.2);
-  sign('MEDIFLOW CLINIC', lx, HALF_D + 1.4, 0x2fcf8f, 4);
+  sign('MEDIFLOW CLINIC', lx, HALF_D + 4.4, 0x2fcf8f, 1.6);
 
   buildOutdoors();
+  buildProps();
   buildOffice(roomX('office'));
   buildLobby(lx);
   buildMri(roomX('mri'));
@@ -258,7 +270,10 @@ function buildOutdoors() {
   // trees along the back and the street
   const trunkMat = std(0x8d6e63);
   const leafMats = [std(0x5fd690), std(0x46c07a), std(0x7be0a4)];
+  const TREES = ['tree_oak', 'tree_default', 'tree_detailed', 'tree_pineRoundA', 'tree_fat'];
   const tree = (x, z, s = 1) => {
+    const k = deco(TREES[Math.floor(Math.random() * TREES.length)], x, z, { height: 4.2 * s, rot: Math.random() * 6, collide: false, y: -0.3 });
+    if (k) { const sway = Math.random() * 6; animated.push((t) => { k.rotation.z = Math.sin(t * 0.9 + sway) * 0.02; }); return; }
     const g = new THREE.Group();
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 1.6, 8), trunkMat);
     trunk.position.y = 0.8;
@@ -289,7 +304,9 @@ function buildOutdoors() {
 
   // parked cars across the street
   const carColors = [0x7fd3ff, 0xffc46b, 0xb39ddb, 0x8ee6b8, 0xff8fa3];
+  const CARS = ['sedan', 'suv', 'taxi', 'van', 'hatchback-sports', 'delivery', 'police'];
   for (let i = 0; i < 7; i++) {
+    if (deco(CARS[i], 4 + i * 15 + Math.random() * 4, 18.6, { size: 4, rot: Math.PI / 2, collide: false, y: -0.3 })) continue;
     const g = new THREE.Group();
     const body = new THREE.Mesh(rbox(3.2, 0.85, 1.6, 0.3), std(carColors[i % carColors.length]));
     body.position.y = 0.55;
@@ -304,6 +321,34 @@ function buildOutdoors() {
     }
     add(g, 4 + i * 15 + Math.random() * 4, -0.3, 18.6);
   }
+}
+
+function buildProps() {
+  const lx = roomX('lobby');
+  // ambulance out front, flowers and bushes by the entrance
+  deco('ambulance', lx - 7, 13.6, { size: 4.6, rot: Math.PI / 2, collide: false, y: -0.3 });
+  for (const [dx, n] of [[-3.2, 'plant_bushLarge'], [3.2, 'plant_bushLarge'], [-4.4, 'flower_redA'], [4.4, 'flower_yellowA'], [-5.4, 'plant_bush'], [5.4, 'plant_bush']]) {
+    deco(n, lx + dx, 8.4, { height: n.startsWith('flower') ? 0.7 : 1.1, collide: false });
+  }
+  // lobby lounge
+  if (deco('loungeSofa', lx - 5.2, 5.2, { size: 3, rot: Math.PI, collide: true })) {
+    deco('loungeSofa', lx - 7.3, 2.4, { size: 3, rot: Math.PI / 2, collide: true });
+    deco('tableCoffee', lx - 5, 2.6, { size: 1.6 });
+    deco('lampSquareFloor', lx - 7.3, 5.6, { height: 2.2, collide: false });
+  }
+  deco('trashcan', lx + 6.6, -0.6, { height: 0.8 });
+  // back office
+  const ox = roomX('office');
+  deco('sideTable', ox + 6.8, 2.5, { height: 1 });
+  deco('kitchenCoffeeMachine', ox + 6.8, 2.5, { height: 0.7, y: 1, collide: false });
+  deco('trashcan', ox - 1.5, -4.6, { height: 0.8 });
+  // billing + law firm
+  deco('coatRackStanding', roomX('billing') + 7, -6, { height: 2.2 });
+  deco('bench', roomX('reading') + 5, 4.5, { size: 2.6, rot: 0 });
+  const fx = roomX('lawfirm');
+  deco('loungeChair', fx - 1.5, -0.2, { size: 1.4, rot: Math.PI });
+  deco('loungeChair', fx + 1.5, -0.2, { size: 1.4, rot: Math.PI });
+  deco('lampSquareFloor', fx + 5, -6, { height: 2.2 });
 }
 
 function buildOffice(cx) {
@@ -340,8 +385,8 @@ function buildLobby(cx) {
   glow.rotation.x = -0.4;
   kiosk.add(post, screen, glow);
   add(kiosk, cx + 5, 0, 1, { collide: true });
-  chairRow(cx - 6.5, 3.5, 4, 0x6f86ff);
-  chairRow(cx - 6.5, 5.6, 4, 0x6f86ff);
+  if (!model('loungeSofa')) chairRow(cx - 6.5, 3.5, 4, 0x6f86ff); else chairRow(cx + 2.4, 5.6, 3, 0x6f86ff);
+  if (!model('loungeSofa')) chairRow(cx - 6.5, 5.6, 4, 0x6f86ff);
   plant(cx + 7, -6, 1.2);
   plant(cx - 7.2, -6, 1.2);
   plant(cx + 7.2, 6, 1);
@@ -423,7 +468,7 @@ function buildLawFirm(cx) {
       add(book, cx + dx - 0.7 + b * 0.35, 0.55 + r * 0.8, -6.1, { shadow: false });
     }
   }
-  chairRow(cx - 1, -0.5, 2, 0x5d4037);
+  if (!model('loungeChair')) chairRow(cx - 1, -0.5, 2, 0x5d4037);
   plant(cx + 7, -6, 1.3);
 }
 

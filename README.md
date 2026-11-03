@@ -75,7 +75,9 @@ claim-rush/
 ├── rush.html             # Rush mode (arcade) page
 ├── src/
 │   ├── story.js          # story flow: intro cutscene, player, camera, chapters
-│   ├── engine/core.js    # renderer, input (keys + touch), synth audio, characters, particles
+│   ├── engine/core.js    # renderer, bloom, input (keys + touch), synth audio, characters, particles
+│   ├── engine/models.js  # loads and clones the Kenney GLB models
+│   ├── engine/music.js   # generated background music
 │   ├── world/campus.js   # the 3D campus: rooms, furniture, gates, NPCs, collisions
 │   ├── ui/ui.js          # dialog, mini-game modal, meters, phone, MediFlow cards
 │   ├── chapters/         # frontDesk.js, mri.js (one module per chapter)
@@ -84,6 +86,7 @@ claim-rush/
 │   ├── story.css         # Story mode UI
 │   └── style.css         # Rush mode UI
 ├── public/seed.json      # Rush mode data: made-up patients, documents, CPT codes
+├── public/models/        # Kenney CC0 GLB models (characters, cars, furniture, nature)
 ├── vite.config.js        # two-page build (story + rush)
 ├── .github/workflows/
 │   └── deploy.yml        # builds and publishes to GitHub Pages on every push to main
@@ -94,9 +97,10 @@ claim-rush/
 
 ## Tech
 
-- **Three.js** for the 3D campus, characters, lighting, cutscene and particles
+- **Three.js** for the 3D campus, lighting with bloom, cutscene and particles
+- **Kenney** CC0 models (Mini Characters, Furniture Kit, Car Kit, Nature Kit) for the animated characters, props, trees and cars, in `public/models/` ([kenney.nl](https://kenney.nl), license in `public/models/LICENSE-kenney.txt`)
 - **Vite** for the dev server and the two-page build
-- **Web Audio API** for synthesized sound effects (no audio files)
+- **Web Audio API** for generated music and sound effects (no audio files)
 - **Google Fonts** (Fredoka)
 - No backend, no accounts, no secrets. `.env.example` is included for completeness.
 
@@ -109,3 +113,7 @@ Every push to `main` runs `.github/workflows/deploy.yml`, which builds the game 
 - [PLAN.md](PLAN.md): the full design, chapter by chapter
 - [ABOUT.md](ABOUT.md): purpose, features and roadmap
 - [CLAUDE.md](CLAUDE.md): setup notes for Claude Code
+
+## Credits
+
+3D models by [Kenney](https://kenney.nl), CC0 (public domain). Everything else was made for this project.

@@ -4,6 +4,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { model } from './models.js';
 
 export { THREE };
 export const std = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, ...extra });
@@ -163,7 +164,26 @@ export function emojiSprite(emoji, size = 1) {
 }
 
 // ---------- characters ----------
-export function person({ color = 0x4f6bff, skin = 0xffe0bd, hair = null, coat = false } = {}) {
+// Kenney mini character with idle/walk animations; falls back to the shape-built person
+function kenneyPerson(name) {
+  const m = model(name, { height: 2.1 });
+  if (!m) return null;
+  const g = new THREE.Group();
+  g.add(m);
+  const mixer = new THREE.AnimationMixer(m.userData.inner);
+  const actions = {};
+  for (const clip of m.userData.animations) actions[clip.name] = mixer.clipAction(clip);
+  actions.idle?.play();
+  const shadow = new THREE.Mesh(new THREE.CircleGeometry(0.55, 24), new THREE.MeshBasicMaterial({ color: 0x1b2240, transparent: true, opacity: 0.12 }));
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.y = 0.02;
+  g.add(shadow);
+  g.userData = { kenney: true, rig: m, mixer, actions, current: 'idle', squash: 0, wave: 0, dust: 0 };
+  return g;
+}
+
+export function person({ color = 0x4f6bff, skin = 0xffe0bd, hair = null, coat = false, model: modelName } = {}) {
+  if (modelName) { const k = kenneyPerson(modelName); if (k) return k; }
   const g = new THREE.Group();
   const rig = new THREE.Group();
   g.add(rig);
@@ -226,8 +246,29 @@ export function person({ color = 0x4f6bff, skin = 0xffe0bd, hair = null, coat = 
   return g;
 }
 
+function play(u, name, fade = 0.2) {
+  if (u.current === name || !u.actions[name]) return;
+  const next = u.actions[name];
+  next.reset().play();
+  u.actions[u.current]?.crossFadeTo(next, fade, false);
+  u.current = name;
+}
+
 export function animatePerson(m, speed, dt) {
   const u = m.userData;
+  if (u.kenney) {
+    if (u.wave > 0) { u.wave = Math.max(0, u.wave - dt); play(u, 'emote-yes'); }
+    else if (speed > 0.5) { play(u, speed > 6 ? 'sprint' : 'walk'); u.actions[u.current].timeScale = Math.max(0.6, speed / 4.5); }
+    else play(u, 'idle');
+    u.mixer.update(dt);
+    if (speed > 3) {
+      u.dust -= dt;
+      if (u.dust <= 0) { u.dust = 0.18; puff(m.getWorldPosition(new THREE.Vector3())); }
+    }
+    u.squash = Math.max(0, u.squash - dt * 4);
+    u.rig.scale.set(1 + u.squash * 0.15, 1 - u.squash * 0.2, 1 + u.squash * 0.15);
+    return;
+  }
   u.walk += dt * (speed > 0.1 ? 12 : 2);
   const amp = Math.min(1, speed / 5);
   u.rig.position.y = Math.abs(Math.sin(u.walk)) * 0.18 * amp;

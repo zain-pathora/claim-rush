@@ -3,6 +3,7 @@ import { buildCampus, updateCampus, resolveCollisions, interactables, npcs, addN
 import { showHud, setChapter, setObjective, setHint, dialog, chapterCard, resetMeters, meters, uiState, toast, wait } from './ui/ui.js';
 import { CASE } from './data/case.js';
 import { orderIntake, scheduling } from './chapters/office.js';
+import { preloadModels } from './engine/models.js';
 import { startMusic, toggleMute, isMuted } from './engine/music.js';
 import { frontDesk } from './chapters/frontDesk.js';
 import { mriSuite } from './chapters/mri.js';
@@ -10,21 +11,28 @@ import { readingRoom } from './chapters/reading.js';
 import { billingRoom, money } from './chapters/billing.js';
 import { lawFirm } from './chapters/lawfirm.js';
 
+// load Kenney models first; the start button waits for them
+const playBtn = document.getElementById('play-story');
+playBtn.disabled = true;
+playBtn.textContent = 'Loading 3D models…';
+await preloadModels((p) => { playBtn.textContent = `Loading 3D models… ${Math.round(p * 100)}%`; });
+playBtn.disabled = false;
+playBtn.textContent = '▶ Story mode';
 buildCampus();
 
 // ---------- cast ----------
 const lobby = roomX('lobby');
 const mri = roomX('mri');
-addNpc('rosa', { name: 'Rosa', role: 'Front Desk', x: lobby - 0.5, z: -3.4, color: 0x2fcf8f, skin: 0xf1c27d, hair: 0x3e2723, icon: '👩🏽‍💼' });
-addNpc('dev', { name: 'Dev', role: 'MRI Technologist', x: mri - 5, z: -5, color: 0x6f86ff, skin: 0xc68642, hair: 0x1b1b1b, coat: true, icon: '🧑🏾‍🔬' });
-addNpc('iris', { name: 'Dr. Wong', role: 'Radiologist', x: roomX('reading') - 4, z: -4.8, color: 0xa66bff, skin: 0xffdbac, hair: 0x212121, coat: true, icon: '👩🏻‍⚕️' });
-addNpc('ben', { name: 'Ben', role: 'Biller', x: roomX('billing') - 4, z: -4.8, color: 0xffa53d, skin: 0xffe0bd, hair: 0xa1887f, icon: '🧑🏼‍💻' });
-addNpc('lena', { name: 'Lena Ortiz', role: 'Attorney', x: roomX('lawfirm'), z: -4.8, color: 0x37474f, skin: 0xffe0bd, hair: 0x5d4037, icon: '👩🏻‍💼' });
-addNpc('sam', { name: 'Ana', role: 'Intake Coordinator', x: roomX('office') - 4, z: -4.8, color: 0x3fb6ff, skin: 0x8d5524, hair: 0x1b1b1b, icon: '🧑🏿‍💼' });
+addNpc('rosa', { name: 'Rosa', role: 'Front Desk', x: lobby - 0.5, z: -3.4, color: 0x2fcf8f, skin: 0xf1c27d, hair: 0x3e2723, icon: '👩🏽‍💼', model: 'character-female-c' });
+addNpc('dev', { name: 'Dev', role: 'MRI Technologist', x: mri - 5, z: -5, color: 0x6f86ff, skin: 0xc68642, hair: 0x1b1b1b, coat: true, icon: '🧑🏾‍🔬', model: 'character-male-c' });
+addNpc('iris', { name: 'Dr. Wong', role: 'Radiologist', x: roomX('reading') - 4, z: -4.8, color: 0xa66bff, skin: 0xffdbac, hair: 0x212121, coat: true, icon: '👩🏻‍⚕️', model: 'character-female-d' });
+addNpc('ben', { name: 'Ben', role: 'Biller', x: roomX('billing') - 4, z: -4.8, color: 0xffa53d, skin: 0xffe0bd, hair: 0xa1887f, icon: '🧑🏼‍💻', model: 'character-male-d' });
+addNpc('lena', { name: 'Lena Ortiz', role: 'Attorney', x: roomX('lawfirm'), z: -4.8, color: 0x37474f, skin: 0xffe0bd, hair: 0x5d4037, icon: '👩🏻‍💼', model: 'character-female-e' });
+addNpc('sam', { name: 'Ana', role: 'Intake Coordinator', x: roomX('office') - 4, z: -4.8, color: 0x3fb6ff, skin: 0x8d5524, hair: 0x1b1b1b, icon: '🧑🏿‍💼', model: 'character-male-e' });
 for (const n of Object.values(npcs)) n.mesh.rotation.y = 0;
 
 // the patient, who follows the player once checked in
-const maya = person({ color: 0xff8fa3, skin: 0xc68642, hair: 0x2d1b14 });
+const maya = person({ color: 0xff8fa3, skin: 0xc68642, hair: 0x2d1b14, model: 'character-female-b' });
 maya.position.set(lobby + 3, 0, 12);
 scene.add(maya);
 const mayaTag = textSprite('Maya', '#1b2240', '#ffffff', 0.5);
@@ -33,10 +41,10 @@ maya.add(mayaTag);
 const follow = { on: false, prev: new THREE.Vector3() };
 
 // the player: care coordinator
-const player = person({ color: 0x4f6bff, skin: 0xffe0bd, hair: 0x4e342e });
+const player = person({ color: 0x4f6bff, skin: 0xffe0bd, hair: 0x4e342e, model: 'character-male-a' });
 const lanyard = new THREE.Mesh(rbox(0.3, 0.38, 0.05, 0.04), std(0xffffff));
 lanyard.position.set(0, 1.05, 0.45);
-player.userData.rig.add(lanyard);
+if (!player.userData.kenney) player.userData.rig.add(lanyard);
 player.position.set(lobby, 0, 9);
 scene.add(player);
 
