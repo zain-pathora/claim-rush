@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claim Rush</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <div id="flash"></div>
+  <div id="hud" class="hidden">
+    <div class="pill" id="score"><span class="ic">★</span><span class="v">0</span></div>
+    <div class="pill" id="level"><span class="ic">▲</span><span class="v">1</span><span class="quota"><i></i></span><span class="k q">0/3</span></div>
+    <div class="pill" id="timer"><span class="ic">⏱</span><span class="v">60</span></div>
+    <div class="pill" id="denials"><span class="ic">✚</span><span class="hearts">❤❤❤</span></div>
+  </div>
+  <div id="carry" class="hidden"></div>
+  <div id="hint" class="hidden"></div>
+  <div id="toast"></div>
+  <div id="prompt-wrap" class="hidden">
+    <div id="prompt">
+      <span class="badge" id="prompt-badge"></span>
+      <h2 id="prompt-title"></h2>
+      <div id="prompt-body"></div>
+      <div id="prompt-options"></div>
+    </div>
+  </div>
+  <div id="screen">
+    <div class="card">
+      <h1>Claim Rush</h1>
+      <p class="tag">Get every patient from intake to lien before the clock runs out.</p>
+      <div class="flow">
+        <div><b>📋</b>Intake</div><div><b>🩺</b>Exam</div><div><b>💳</b>Claim</div><div><b>⚖️</b>Lien</div>
+      </div>
+      <p class="keys"><kbd>WASD</kbd> move · <kbd>E</kbd> pick up / drop off · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> answer</p>
+      <button id="start" class="big">Start shift</button>
+      <p class="small">All patients are made up. No PHI.</p>
+    </div>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

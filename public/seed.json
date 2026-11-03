@@ -1,0 +1,27 @@
+{
+  "_note": "All data is made up. No real patients.",
+  "patients": [
+    { "name": "Ava Pinecrest", "complaint": "Lower back pain after car accident" },
+    { "name": "Milo Grant", "complaint": "Neck stiffness, whiplash" },
+    { "name": "Rosa Quill", "complaint": "Knee swelling after a fall" },
+    { "name": "Theo Marsh", "complaint": "Shoulder pain, rear-end collision" },
+    { "name": "Nia Bloom", "complaint": "Headaches since accident" },
+    { "name": "Omar Vale", "complaint": "Wrist injury at work" },
+    { "name": "June Harlow", "complaint": "Mid-back pain" },
+    { "name": "Leo Frost", "complaint": "Ankle sprain, slip and fall" },
+    { "name": "Ivy Castell", "complaint": "Hip pain after crash" },
+    { "name": "Sam Ortiz", "complaint": "Follow-up, chronic neck pain" }
+  ],
+  "documents": ["Photo ID", "Insurance Card", "Intake Form", "Accident Report", "Attorney LOP", "HIPAA Consent"],
+  "exams": [
+    { "name": "New patient exam", "cpt": "99203" },
+    { "name": "Established patient visit", "cpt": "99213" },
+    { "name": "Spinal manipulation (3-4 regions)", "cpt": "98941" },
+    { "name": "Therapeutic exercise", "cpt": "97110" },
+    { "name": "Lumbar spine X-ray", "cpt": "72100" },
+    { "name": "Cervical spine X-ray", "cpt": "72040" },
+    { "name": "MRI lumbar spine", "cpt": "72148" },
+    { "name": "Manual therapy", "cpt": "97140" }
+  ],
+  "attorneys": ["Birch & Co. Law", "Harbor Injury Group", "Summit Legal", "Redwood Advocates"]
+}
