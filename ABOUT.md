@@ -9,8 +9,10 @@ A 3D story game that teaches how Pathora's MediFlow 360 runs a personal-injury l
 The lien world is hard to explain. Nobody here is an insurance payer. The patient is treated on credit, the bill is negotiated with the attorney for years, and the case only closes when the provider releases its lien. New staff, developers and customers learn this slowly from specs. Claim Rush puts it into something you can do with your hands in fifteen minutes.
 
 ## Features
-- **Story mode, seven chapters:** the accident, Front Desk, Prescreen & MRI, Reading Room & QC, Billing & Liens, the Law Firm negotiation, and Settlement.
+- **Story mode, nine chapters:** the accident, Order Intake, Scheduling, Front Desk, Prescreen & MRI, Reading Room & QC, Billing & Liens, the Law Firm negotiation, and Settlement.
 - **Mini-games built from real workflows:**
+  - tagging a faxed referral and catching the AI's wrong split
+  - logging booking calls and finding a slot on a lease calendar
   - a one-time-code login from a phone overlay
   - catching a wrong date of birth on the referral
   - choosing the intake consents
@@ -37,6 +39,5 @@ The lien world is hard to explain. Nobody here is an insurance payer. The patien
 - Built with Claude Code.
 
 ## What's next
-- Chapters for Order Intake (sorting fax pages) and Scheduling (a lease-calendar puzzle).
 - Case Files: the radiologist-sells case and the shoulder arthrogram.
 - Kenney low-poly models and music.

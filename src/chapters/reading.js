@@ -18,8 +18,8 @@ export async function readingRoom(ctx) {
   const rx = roomX('reading');
   setObjective('Head to the Reading Room');
   await waitFor({ pos: new THREE.Vector3(rx - 6, 0, 0), label: 'Enter the Reading Room', radius: 3 });
-  await chapterCard(3, 'Reading Room & QC', 'Right patient. Right body part. Then it can bill.');
-  setChapter(3, 'Reading Room & QC');
+  await chapterCard(5, 'Reading Room & QC', 'Right patient. Right body part. Then it can bill.');
+  setChapter(5, 'Reading Room & QC');
 
   setObjective('Check in with Dr. Wong');
   await waitFor({ npc: 'iris' });

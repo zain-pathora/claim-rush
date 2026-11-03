@@ -13,8 +13,8 @@ export async function mriSuite(ctx) {
 
   setObjective('Walk Maya to the imaging wing');
   await waitFor({ pos: new THREE.Vector3(mx - 6, 0, 0), label: 'Enter the imaging wing', radius: 3 });
-  await chapterCard(2, 'Prescreen & MRI', 'Safety first. Then a clean scan.');
-  setChapter(2, 'Prescreen & MRI');
+  await chapterCard(4, 'Prescreen & MRI', 'Safety first. Then a clean scan.');
+  setChapter(4, 'Prescreen & MRI');
 
   // a. prescreen
   setObjective('Review Maya\'s prescreen with Dev');

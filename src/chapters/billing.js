@@ -12,8 +12,8 @@ export async function billingRoom(ctx) {
   const bx = roomX('billing');
   setObjective('Take the exam to Billing');
   await waitFor({ pos: new THREE.Vector3(bx - 6, 0, 0), label: 'Enter Billing & Liens', radius: 3 });
-  await chapterCard(4, 'Billing & Liens', 'One MRI. Two bills. Two liens.');
-  setChapter(4, 'Billing & Liens');
+  await chapterCard(6, 'Billing & Liens', 'One MRI. Two bills. Two liens.');
+  setChapter(6, 'Billing & Liens');
 
   setObjective('Build the bill with Ben');
   await waitFor({ npc: 'ben' });

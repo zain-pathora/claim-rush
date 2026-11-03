@@ -12,8 +12,8 @@ export async function frontDesk(ctx) {
   const lx = roomX('lobby');
   const rosa = { name: 'Rosa', role: 'Front Desk', icon: '👩🏽‍💼' };
 
-  await chapterCard(1, 'Front Desk', `${CASE.clinic} · Check-in`);
-  setChapter(1, 'Front Desk');
+  await chapterCard(3, 'Front Desk', `${CASE.clinic} · Check-in`);
+  setChapter(3, 'Front Desk');
 
   // a. greet Maya
   setObjective('Meet Maya at the clinic entrance');

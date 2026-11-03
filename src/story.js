@@ -2,6 +2,7 @@ import { THREE, scene, camera, sun, onFrame, startLoop, tick, onKey, moveVector,
 import { buildCampus, updateCampus, resolveCollisions, interactables, npcs, addNpc, openGate, roomX, magnet } from './world/campus.js';
 import { showHud, setChapter, setObjective, setHint, dialog, chapterCard, resetMeters, meters, uiState, toast, wait } from './ui/ui.js';
 import { CASE } from './data/case.js';
+import { orderIntake, scheduling } from './chapters/office.js';
 import { frontDesk } from './chapters/frontDesk.js';
 import { mriSuite } from './chapters/mri.js';
 import { readingRoom } from './chapters/reading.js';
@@ -234,6 +235,10 @@ async function story() {
   const caseState = { billed: { tech: 180000, rad: 45000 }, buyPrice: 30000, ownsRad: false };
   const ctx = { player, maya, follow, npcs, waitFor, walkMaya, state, magnet, openGate, caseState };
   const unlock = (i, text) => { openGate(i); sfx.door(); toast(`🔓 ${text} unlocked`, 'good'); };
+  player.position.set(roomX('office') + 2, 0, 2);
+  await orderIntake(ctx);
+  await scheduling(ctx);
+  unlock(0, 'Lobby');
   await frontDesk(ctx);
   unlock(1, 'Imaging wing');
   await mriSuite(ctx);

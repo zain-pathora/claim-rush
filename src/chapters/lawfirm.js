@@ -12,8 +12,8 @@ export async function lawFirm(ctx) {
   const lx = roomX('lawfirm');
   setObjective('Visit the law firm');
   await waitFor({ pos: new THREE.Vector3(lx - 6, 0, 0), label: `Enter ${CASE.attorney.firm}`, radius: 3 });
-  await chapterCard(5, 'The Negotiation', `${CASE.attorney.firm} · two-way bill offer`);
-  setChapter(5, 'The Negotiation');
+  await chapterCard(7, 'The Negotiation', `${CASE.attorney.firm} · two-way bill offer`);
+  setChapter(7, 'The Negotiation');
 
   setObjective('Negotiate the bill with Lena');
   await waitFor({ npc: 'lena' });
@@ -28,8 +28,8 @@ export async function lawFirm(ctx) {
     'The firm and the provider trade offers: SENT → COUNTERED → APPROVED. There\'s no round limit. The provider ends it by approving or marking an offer final. The agreed reduction shows on the bill under Adjustments.');
 
   // ---------- settlement ----------
-  await chapterCard(6, 'Settlement', 'The case settles. Time to get paid and let go.');
-  setChapter(6, 'Settlement');
+  await chapterCard(8, 'Settlement', 'The case settles. Time to get paid and let go.');
+  setChapter(8, 'Settlement');
   setObjective('Collect the settlement payment from Lena');
   await waitFor({ npc: 'lena', label: 'Collect the cheque' });
   await dialog(lena, [`Maya's case settled. Here's a cheque from our trust account for ${money(cs.agreed)}.`]);
