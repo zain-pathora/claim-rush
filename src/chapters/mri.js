@@ -3,6 +3,7 @@ import { roomX } from '../world/campus.js';
 import { setChapter, setObjective, dialog, chapterCard, openModal, mediflowCard, bumpMeter, toast, wait } from '../ui/ui.js';
 import { speak } from '../ui/voice.js';
 import { CASE, PRESCREEN, METAL } from '../data/case.js';
+import { lienRouting, esignChannels } from './billing.js';
 
 const BLUE = '#6f86ff';
 const dev = { name: 'Dev', role: 'MRI Technologist', icon: '🧑🏾‍🔬' };
@@ -60,9 +61,18 @@ export async function mriSuite(ctx) {
   if (who === 0) toast('✓ Right: MediFlow is never where a study is read', 'good');
   else bumpMeter('compliance', -10, 'the read happens in the radiologist\'s own system');
   await statusChain();
+
+  // f. liens are signed when the exam completes, before anything is billed
+  setObjective('Get Maya\'s liens signed before she leaves');
+  await dialog(dev, [
+    '[serious] The exam is Completed, so this is when Maya signs her liens: one for the scan (TECH) and one for Dr. Wong\'s read (RAD).',
+    'Signing doesn\'t lock in any amounts. A lien names no codes and no dollars. The bills come later.',
+  ]);
+  await lienRouting();
+  await esignChannels(dev);
   burst(new THREE.Vector3(magnet.x, 3, magnet.z), [0x6f86ff, 0xffffff, 0x9b5cff], 60, 7);
   await mediflowCard('Prescreen · Exam statuses · Read Assigned',
-    'Prescreen answers drive the safety logic: claustrophobia routes to an open magnet, pregnancy attaches a waiver. The exam moves Scheduled → Arrived → In Progress → Completed → Read Assigned → Signed. One MRI is two pieces of work: the scan (TECH) and the radiologist\'s read (RAD), so two bills and two liens.');
+    'Prescreen answers drive the safety logic: claustrophobia routes to an open magnet, pregnancy attaches a waiver. The exam moves Scheduled → Arrived → In Progress → Completed → Read Assigned → Signed. One MRI is two pieces of work: the scan (TECH) and the radiologist\'s read (RAD), so two bills and two liens. The liens are signed when the exam completes, before anything is billed.');
 }
 
 async function prescreen() {

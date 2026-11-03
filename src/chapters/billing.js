@@ -29,14 +29,6 @@ export async function billingRoom(ctx) {
   else bumpMeter('compliance', -8, 'TECH bills first; a stray RAD bill confuses the firm');
   await billChain();
 
-  setObjective('Route the liens to the right signers');
-  await dialog(ben, [
-    'Each component gets its own lien, signed by the patient (PSL) and by the attorney (ASL).',
-    '[serious] Remember: signing a lien doesn\'t lock in any amounts. It names no codes and no dollars.',
-  ]);
-  await lienRouting();
-  await esignChannels();
-
   setObjective('Decide on Dr. Wong\'s lien offer');
   const buy = await dialog({ name: CASE.radiologist.name, role: CASE.radiologist.group, icon: CASE.radiologist.icon }, [
     `[serious] Settlement could take three years. We'd rather have cash now. We'll sell you our RAD lien (${money(cs.billed.rad)} billed) for ${money(cs.buyPrice)}.`,
@@ -93,7 +85,7 @@ async function billChain() {
   m.close();
 }
 
-async function lienRouting() {
+export async function lienRouting() {
   const docs = [
     { code: 'TECH_PSL', who: 'PATIENT' }, { code: 'TECH_ASL', who: 'ATTORNEY' },
     { code: 'RAD_PSL', who: 'PATIENT' }, { code: 'RAD_ASL', who: 'ATTORNEY' },
@@ -116,8 +108,8 @@ async function lienRouting() {
   else bumpMeter('compliance', -6 * wrong, 'PSL goes to the patient, ASL to the attorney');
 }
 
-async function esignChannels() {
-  const how = await dialog(ben, ['Maya gets her sign link by text. How do we reach Lena at the firm?'],
+export async function esignChannels(speaker = ben) {
+  const how = await dialog(speaker, ['Maya gets her sign link by text. How do we reach Lena at the firm?'],
     ['Email or fax', 'Text message, same as Maya', 'A phone call']);
   if (how === 0) toast('✓ Attorneys get email or fax, never SMS', 'good');
   else bumpMeter('compliance', -6, 'attorneys are reached by email or fax only');
