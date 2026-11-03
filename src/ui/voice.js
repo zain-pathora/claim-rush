@@ -114,7 +114,7 @@ export function speak(html, speaker = 'Narrator', { queue = false, emotion } = {
   last.push([html, speaker, emotion]);
   const cast = CAST[castKey(speaker)];
   const voice = voiceFor(speaker);
-  const parts = text.match(/[^.!?…:]+[.!?…:]*\s*/g) || [text];
+  const parts = text.match(/[^.!?…]+[.!?…]*\s*/g) || [text];
   parts.forEach((part) => {
     const u = new SpeechSynthesisUtterance(part.trim());
     if (voice) { u.voice = voice; u.lang = voice.lang; }
