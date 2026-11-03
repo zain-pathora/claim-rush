@@ -1,6 +1,7 @@
 import { THREE, sfx, burst, fx, onKey } from '../engine/core.js';
 import { roomX } from '../world/campus.js';
 import { setChapter, setObjective, dialog, chapterCard, openModal, mediflowCard, bumpMeter, toast, wait } from '../ui/ui.js';
+import { speak } from '../ui/voice.js';
 import { CASE, PRESCREEN, METAL } from '../data/case.js';
 
 const BLUE = '#6f86ff';
@@ -103,44 +104,52 @@ async function pickMachine() {
 }
 
 async function metalSweep() {
-  const m = openModal({ badge: '⚠️ ZONE IV', title: 'Clear the metal: 12 seconds', color: '#ff4d6d', wide: true });
-  m.body.innerHTML = `<p>Tap everything metal or magnetic to put it in the locker. Anything left behind <b>flies into the magnet</b>.</p>
-    <div class="timerbar"><i></i></div><div class="sweep"><div class="body">🧍🏽‍♀️</div><div class="magnet-edge"></div></div>`;
-  const area = m.body.querySelector('.sweep');
-  const items = [...METAL].sort(() => Math.random() - 0.5).slice(0, 9);
-  if (!items.some((i) => !i.metal)) items[0] = METAL.find((i) => !i.metal);
-  items.forEach((it, k) => {
-    const d = document.createElement('div');
-    d.className = 'item';
-    d.textContent = it.i;
-    d.title = it.n;
-    const ang = (k / items.length) * Math.PI * 2;
-    d.style.left = `${46 + Math.cos(ang) * 30}%`;
-    d.style.top = `${42 + Math.sin(ang) * 32}%`;
-    d.style.animationDelay = `${k * 0.15}s`;
-    d.onclick = () => {
-      if (it.metal) { d.classList.add('got'); it.got = true; sfx.good(); }
-      else { d.classList.add('shake'); sfx.bad(); bumpMeter('trust', -2, `${it.n.toLowerCase()} are safe`); it.wrong = true; }
-    };
-    it.el = d;
-    area.appendChild(d);
-  });
-  const bar = m.body.querySelector('.timerbar i');
-  let left = 12;
-  await new Promise((r) => {
-    const iv = setInterval(() => {
-      left -= 0.1;
-      bar.style.transform = `scaleX(${Math.max(0, left / 12)})`;
-      if (left <= 0 || items.filter((i) => i.metal).every((i) => i.got)) { clearInterval(iv); r(); }
-    }, 100);
-  });
-  const left_ = items.filter((i) => i.metal && !i.got);
-  for (const it of left_) { it.el.classList.add('pulled'); }
-  if (left_.length) { sfx.bad(); fx.shake = 0.6; document.getElementById('flash').classList.remove('on'); void document.body.offsetWidth; document.getElementById('flash').classList.add('on'); }
-  await wait(900);
+  const m = openModal({ badge: '⚠️ ZONE IV', title: 'Clear the metal before the timer runs out', color: '#ff4d6d', wide: true });
+  // keep going until a round is cleared; each failed round costs Compliance and gives a bit more time
+  for (let round = 1; ; round++) {
+    const seconds = 12 + (round - 1) * 3;
+    m.body.innerHTML = `<p>${round === 1 ? 'Tap everything metal or magnetic to put it in the locker. Anything left behind <b>flies into the magnet</b>.' : `<b>Try again (attempt ${round})</b>. Dev reset the room. You have ${seconds} seconds.`}</p>
+      <div class="timerbar"><i></i></div><div class="sweep"><div class="body">🧍🏽‍♀️</div><div class="magnet-edge"></div></div>`;
+    if (round > 1) speak(`Try again. Attempt ${round}. You have ${seconds} seconds.`);
+    const area = m.body.querySelector('.sweep');
+    const items = [...METAL].sort(() => Math.random() - 0.5).slice(0, 9).map((i) => ({ ...i }));
+    if (!items.some((i) => !i.metal)) items[0] = { ...METAL.find((i) => !i.metal) };
+    items.forEach((it, k) => {
+      const d = document.createElement('div');
+      d.className = 'item';
+      d.textContent = it.i;
+      d.title = it.n;
+      const ang = (k / items.length) * Math.PI * 2;
+      d.style.left = `${46 + Math.cos(ang) * 30}%`;
+      d.style.top = `${42 + Math.sin(ang) * 32}%`;
+      d.style.animationDelay = `${k * 0.15}s`;
+      d.onclick = () => {
+        if (it.metal) { d.classList.add('got'); it.got = true; sfx.good(); }
+        else { d.classList.add('shake'); sfx.bad(); toast(`${it.n} are safe to keep on`, 'info'); }
+      };
+      it.el = d;
+      area.appendChild(d);
+    });
+    const bar = m.body.querySelector('.timerbar i');
+    let left = seconds;
+    await new Promise((r) => {
+      const iv = setInterval(() => {
+        left -= 0.1;
+        bar.style.transform = `scaleX(${Math.max(0, left / seconds)})`;
+        if (left <= 0 || items.filter((i) => i.metal).every((i) => i.got)) { clearInterval(iv); r(); }
+      }, 100);
+    });
+    const missed = items.filter((i) => i.metal && !i.got);
+    if (!missed.length) break;
+    for (const it of missed) it.el.classList.add('pulled');
+    sfx.bad(); fx.shake = 0.6;
+    const f = document.getElementById('flash'); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
+    bumpMeter('compliance', -5, `${missed.map((i) => i.n.toLowerCase()).join(', ')} got pulled into the magnet`);
+    await wait(1400);
+  }
   m.close();
-  if (left_.length) bumpMeter('compliance', -8 * left_.length, `${left_.map((i) => i.n.toLowerCase()).join(', ')} hit the magnet`);
-  else { sfx.great(); toast('✓ Zone IV clear', 'good'); }
+  sfx.great();
+  toast('✓ Zone IV clear', 'good');
 }
 
 function drawSlice(cv, quality, k) {
@@ -165,41 +174,53 @@ function drawSlice(cv, quality, k) {
 
 async function scanGame(open) {
   const m = openModal({ badge: '🧲 SCANNING', title: 'Capture 3 clean sequences', color: BLUE, wide: true });
-  m.body.innerHTML = `<p>Press <kbd>Space</kbd> (or tap) when the cursor is in the green window. Miss it and the image blurs.${open ? '' : ' <b>Closed bore:</b> Maya is nervous, so the window is smaller.'}</p>
+  m.body.innerHTML = `<p>Press <kbd>Space</kbd> (or tap) when the cursor is in the green window. If you miss, the image blurs and you run that sequence again.${open ? '' : ' <b>Closed bore:</b> Maya is nervous, so the window is smaller.'}</p>
+    <p class="scanmsg"></p>
     <div class="scanner"><div class="zone"></div><div class="cursor"></div></div>
     <div class="slices">${[0, 1, 2].map(() => '<div class="slice"><canvas width="200" height="200"></canvas></div>').join('')}</div>`;
   const zone = m.body.querySelector('.zone');
   const cursor = m.body.querySelector('.cursor');
+  const msg = m.body.querySelector('.scanmsg');
   const canvases = [...m.body.querySelectorAll('canvas')];
-  let clean = 0;
+  const NAMES = ['T1 sagittal', 'T2 sagittal', 'T2 axial'];
+  let retakes = 0;
   for (let k = 0; k < 3; k++) {
-    const width = (open ? 22 : 13) - k * 2;
-    const start = 15 + Math.random() * (70 - width);
-    zone.style.left = `${start}%`; zone.style.width = `${width}%`;
-    const speed = 70 + k * 25;
-    const hit = await new Promise((resolve) => {
-      let x = 0; let dir = 1; let last = performance.now();
-      let raf;
-      const step = (now) => {
-        const dt = Math.min(0.05, (now - last) / 1000); last = now;
-        x += dir * speed * dt;
-        if (x > 99) { x = 99; dir = -1; } if (x < 0) { x = 0; dir = 1; }
-        cursor.style.left = `${x}%`;
+    // retry the same sequence until it's clean; the window widens a little after each miss
+    for (let attempt = 1; ; attempt++) {
+      msg.innerHTML = attempt === 1 ? `Sequence ${k + 1} of 3: <b>${NAMES[k]}</b>` : `<b style="color:#ff4d6d">Blurry. Re-run ${NAMES[k]} (attempt ${attempt})</b>`;
+      const width = Math.min(35, (open ? 22 : 13) - k * 2 + (attempt - 1) * 4);
+      const start = 15 + Math.random() * (70 - width);
+      zone.style.left = `${start}%`; zone.style.width = `${width}%`;
+      const speed = Math.max(55, 70 + k * 25 - (attempt - 1) * 10);
+      const hit = await new Promise((resolve) => {
+        let x = 0; let dir = 1; let last = performance.now();
+        let raf;
+        const step = (now) => {
+          const dt = Math.min(0.05, (now - last) / 1000); last = now;
+          x += dir * speed * dt;
+          if (x > 99) { x = 99; dir = -1; } if (x < 0) { x = 0; dir = 1; }
+          cursor.style.left = `${x}%`;
+          raf = requestAnimationFrame(step);
+        };
         raf = requestAnimationFrame(step);
-      };
-      raf = requestAnimationFrame(step);
-      const fire = () => { cancelAnimationFrame(raf); off(); m.body.removeEventListener('pointerdown', fire); resolve(x >= start && x <= start + width); };
-      const off = onKey((key) => { if (key === ' ' || key === 'enter') fire(); });
-      setTimeout(() => m.body.addEventListener('pointerdown', fire), 200);
-    });
-    drawSlice(canvases[k], hit ? 1 : 0.2, k);
-    if (hit) { clean++; sfx.good(); } else { sfx.bad(); fx.shake = 0.25; }
-    await wait(450);
+        const fire = () => { cancelAnimationFrame(raf); off(); m.body.removeEventListener('pointerdown', fire); resolve(x >= start && x <= start + width); };
+        const off = onKey((key) => { if (key === ' ' || key === 'enter') fire(); });
+        setTimeout(() => m.body.addEventListener('pointerdown', fire), 200);
+      });
+      drawSlice(canvases[k], hit ? 1 : 0.2, k);
+      if (hit) { sfx.good(); await wait(450); break; }
+      retakes++;
+      sfx.bad(); fx.shake = 0.25;
+      speak(`Blurry. Try ${NAMES[k]} again.`);
+      await wait(900);
+    }
   }
-  await wait(500);
+  msg.innerHTML = '<b style="color:#1fc98a">All three sequences are clean.</b>';
+  await wait(700);
   m.close();
-  if (clean === 3) { sfx.great(); toast('✓ Three clean sequences', 'good'); }
-  else bumpMeter('trust', -6 * (3 - clean), `${3 - clean} sequence${3 - clean > 1 ? 's' : ''} had to be re-run`);
+  sfx.great();
+  if (!retakes) toast('✓ Three clean sequences on the first try', 'good');
+  else bumpMeter('trust', -Math.min(15, 3 * retakes), `${retakes} re-run${retakes > 1 ? 's' : ''}: a longer scan for Maya`);
 }
 
 async function statusChain() {

@@ -267,3 +267,4 @@ button.big:active { transform: translateY(6px); box-shadow: 0 2px 0 #3446c4; }
 .tags { position: sticky; bottom: -24px; background: #fff; padding: 10px 0; margin: 0 -4px; z-index: 2; box-shadow: 0 -8px 12px -8px rgba(40,50,110,.15); }
 #mute { position: fixed; left: 14px; bottom: 14px; width: 46px; height: 46px; padding: 0; border-radius: 50%; background: var(--glass); backdrop-filter: blur(12px); border: 2px solid var(--line); box-shadow: var(--shadow); font-size: 20px; z-index: 61; }
 #voice { position: fixed; left: 68px; bottom: 14px; width: 46px; height: 46px; padding: 0; border-radius: 50%; background: var(--glass); backdrop-filter: blur(12px); border: 2px solid var(--line); box-shadow: var(--shadow); font-size: 20px; z-index: 61; }
+.scanmsg { min-height: 24px; margin: 4px 0; font-size: 16px; }
